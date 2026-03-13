@@ -125,16 +125,46 @@ fn main() {
             }
         });
     println!("Готово! Записываю");
-
-    let path = Path::new("37.bmp");
-    image::save_buffer(
-        path,
-        &pngvec,
-        width as u32,
-        height as u32,
-        image::ColorType::L8,
-    )
-    .expect("neydacha");
+    let mut input = String::new();
+    println!("Выберите формат вывода: 1 - BMP, 2 - PNG");
+    let choice = loop {
+        input.clear();
+        std::io::stdin()
+            .read_line(&mut input)
+            .expect("Ошибка ввода");
+        if let Ok(num) = input.trim().parse::<u8>() {
+            if num == 1 || num == 2 {
+                break num;
+            } else {
+                println!("Введите 1 или 2");
+            }
+        }
+    };
+    match choice {
+        1 => {
+            let path = Path::new("37.bmp");
+            image::save_buffer(
+                path,
+                &pngvec,
+                width as u32,
+                height as u32,
+                image::ColorType::L8,
+            )
+            .expect("neydacha");
+        }
+        2 => {
+            let path = Path::new("37.png");
+            image::save_buffer(
+                path,
+                &pngvec,
+                width as u32,
+                height as u32,
+                image::ColorType::L8,
+            )
+            .expect("neydacha");
+        }
+        _ => unreachable!(),
+    }
     std::fs::write("output.txt", &buffer).expect("Не удалось записать файл");
     println!("Готово! Смотри результат в output.txt");
 }
