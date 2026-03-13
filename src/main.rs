@@ -9,6 +9,20 @@ const MASK_GRAY: [[u8; 3]; 3] = [[0, 1, 0], [1, 1, 1], [0, 1, 0]];
 const MASK_LIGHT: [[u8; 3]; 3] = [[0, 0, 0], [0, 1, 0], [0, 0, 0]];
 
 const MASK_WHITE: [[u8; 3]; 3] = [[0, 0, 0], [0, 0, 0], [0, 0, 0]];
+const STAMP_3: [[u8; 5]; 5] = [
+    [0, 0, 0, 0, 0],         // y=0 (Верх)
+    [255, 255, 255, 255, 0], // y=1
+    [0, 0, 0, 0, 0],         // y=2 (Середина)
+    [255, 255, 255, 255, 0], // y=3
+    [0, 0, 0, 0, 0],         // y=4 (Низ)
+];
+const STAMP_7: [[u8; 5]; 5] = [
+    [0, 0, 0, 0, 0],         // y=0 (Крыша)
+    [255, 255, 255, 255, 0], // y=1
+    [255, 255, 255, 0, 255], // y=2
+    [255, 255, 0, 255, 255], // y=3
+    [255, 0, 255, 255, 255], // y=4 (Ножка)
+];
 fn main() {
     let img = Path::new("img.png");
     let img = open(img).expect("error img");
@@ -85,6 +99,42 @@ fn main() {
             }
             row[width - 1] = b'\n';
         });
+    drop(res);
+    let width = width * 5;
+    let height = height * 5;
+    let mut pngvec = vec![u8::MAX; width * height];
+    pngvec
+        .par_chunks_mut(width)
+        .enumerate()
+        .for_each(|(y, row)| {
+            let rowy = y / 5;
+            let maty = y % 5;
+            for x in 0..width {
+                let pixel = x / 5;
+                let matx = x % 5;
+                let cords = (rowy * (width / 5)) + pixel;
+                match buffer[cords] {
+                    51 => {
+                        row[x] = STAMP_3[maty][matx];
+                    }
+                    55 => {
+                        row[x] = STAMP_7[maty][matx];
+                    }
+                    _ => (),
+                }
+            }
+        });
+    println!("Готово! Записываю");
+
+    let path = Path::new("37.bmp");
+    image::save_buffer(
+        path,
+        &pngvec,
+        width as u32,
+        height as u32,
+        image::ColorType::L8,
+    )
+    .expect("neydacha");
     std::fs::write("output.txt", &buffer).expect("Не удалось записать файл");
     println!("Готово! Смотри результат в output.txt");
 }
