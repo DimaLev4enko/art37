@@ -23,8 +23,21 @@ const STAMP_7: [[u8; 5]; 5] = [
     [0, 0, 1, 0, 0], // y=3
     [0, 1, 0, 0, 0], // y=4 (Ножка)
 ];
+fn parse() -> String {
+    let mut buffer = String::new();
+    loop {
+        buffer.clear();
+        std::io::stdin().read_line(&mut buffer).expect("cant parse");
+        if buffer.is_empty() {
+            println!("Try again");
+        } else {
+            break buffer.trim().to_string();
+        }
+    }
+}
 fn main() {
-    let img = Path::new("img.png");
+    println!("Enter img path");
+    let img = parse();
     let img = open(img).expect("error img");
     let width = img.width();
     let height = img.height();
@@ -55,8 +68,8 @@ fn main() {
                     cb as u8
                 })
                 .collect();
-            let path = Path::new("new.png");
-            image::save_buffer(path, &res, width, height, image::ColorType::L8).expect("neydacha");
+            // let path = Path::new("new.png");
+            // image::save_buffer(path, &res, width, height, image::ColorType::L8).expect("neydacha");
             let width = ((width * 3) + 1) as usize;
             let height = (height * 3) as usize;
             let mut buffer = vec![b' '; width * height];
@@ -162,7 +175,8 @@ fn main() {
             };
             match choice {
                 1 => {
-                    let path = Path::new("37.bmp");
+                    println!("Enter file name");
+                    let path = parse();
                     image::save_buffer(
                         path,
                         &pngvec,
@@ -173,7 +187,8 @@ fn main() {
                     .expect("neydacha");
                 }
                 2 => {
-                    let path = Path::new("37.png");
+                    println!("Enter file name");
+                    let path = parse();
                     image::save_buffer(
                         path,
                         &pngvec,
@@ -219,7 +234,9 @@ fn main() {
                         }
                     }
                 });
-            let path = Path::new("37.png");
+
+            println!("Enter file name");
+            let path = parse();
             image::save_buffer(
                 path,
                 &pngvec,
