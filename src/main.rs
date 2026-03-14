@@ -191,7 +191,7 @@ fn main() {
         2 => {
             let width = width * 5;
             let height = height * 5;
-            let mut pngvec = vec![u8::MAX; (width * height) as usize * 3];
+            let mut pngvec = vec![128; (width * height) as usize * 3];
             pngvec
                 .par_chunks_mut(width as usize * 3)
                 .enumerate()
