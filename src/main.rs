@@ -231,18 +231,34 @@ fn main() {
             };
             let colour = if choice == 2 { 2 } else { 255 };
 
+            println!("введите кратность");
+            let choice = loop {
+                input.clear();
+                std::io::stdin()
+                    .read_line(&mut input)
+                    .expect("Ошибка ввода");
+                if let Ok(num) = input.trim().parse::<usize>() {
+                    if num > 0 {
+                        break num;
+                    } else {
+                        println!("Введите больше 0");
+                    }
+                }
+            };
+            let kratnost = choice * 5;
+            let skoka = choice;
             let mut pngvec = vec![0; (width * height) as usize * 3];
             pngvec
                 .par_chunks_mut(width as usize * 3)
                 .enumerate()
                 .for_each(|(y, row)| {
-                    let rowy = y / 5;
-                    let maty = y % 5;
-                    let rowy1 = rowy * 5;
+                    let rowy = y / kratnost;
+                    let maty = (y % kratnost) / skoka;
+                    let rowy1 = rowy * kratnost;
                     for x in 0..width {
-                        let pixel = x / 5;
-                        let pixel1 = pixel * 5;
-                        let matx = (x % 5) as usize;
+                        let pixel = x / kratnost as u32;
+                        let pixel1 = pixel * kratnost as u32;
+                        let matx = ((x % kratnost as u32) / skoka as u32) as usize;
                         let cords = ((rowy1 as u32 * width) + pixel1) * 3;
                         let cords = cords as usize;
                         let i = (x * 3) as usize;
