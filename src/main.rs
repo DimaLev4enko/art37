@@ -43,7 +43,7 @@ fn main() {
     println!("Открыта картинка: {:?}x{:?}", width, height);
     let rgb = img.to_rgb8();
     let mut input = String::new();
-    println!("Выберите формат вывода: 1 - Classic, 2 - RGB");
+    println!("Выберите формат вывода: 1 - Classic, 2 - RGB, 3 - 1В1");
     let choice = loop {
         input.clear();
         std::io::stdin()
@@ -53,7 +53,7 @@ fn main() {
             if num == 1 || num == 2 || num == 3 {
                 break num;
             } else {
-                println!("Введите 1 или 2");
+                println!("Введите от 1 до 3");
             }
         }
     };
@@ -215,6 +215,22 @@ fn main() {
             .expect("neydacha");
         }
         3 => {
+            println!("какой фон? 1.Черний 2.Автоматический");
+            let choice = loop {
+                input.clear();
+                std::io::stdin()
+                    .read_line(&mut input)
+                    .expect("Ошибка ввода");
+                if let Ok(num) = input.trim().parse::<u8>() {
+                    if num == 1 || num == 2 {
+                        break num;
+                    } else {
+                        println!("Введите 1 или 2");
+                    }
+                }
+            };
+            let colour = if choice == 2 { 2 } else { 255 };
+
             let mut pngvec = vec![0; (width * height) as usize * 3];
             pngvec
                 .par_chunks_mut(width as usize * 3)
@@ -236,9 +252,9 @@ fn main() {
                                 row[i + 1] = rgb[cords + 1]; // Переложили зеленый
                                 row[i + 2] = rgb[cords + 2]; // Переложили синий
                             } else if STAMP_3[maty][matx] == 0 {
-                                row[i] = rgb[cords] / 2; // Переложили красный
-                                row[i + 1] = rgb[cords + 1] / 2; // Переложили зеленый
-                                row[i + 2] = rgb[cords + 2] / 2; // Переложили синий
+                                row[i] = rgb[cords] / colour; // Переложили красный
+                                row[i + 1] = rgb[cords + 1] / colour; // Переложили зеленый
+                                row[i + 2] = rgb[cords + 2] / colour; // Переложили синий
                             }
                         } else {
                             if STAMP_7[maty][matx] == 1 {
@@ -246,9 +262,9 @@ fn main() {
                                 row[i + 1] = rgb[cords + 1]; // Переложили зеленый
                                 row[i + 2] = rgb[cords + 2]; // Переложили синий
                             } else if STAMP_7[maty][matx] == 0 {
-                                row[i] = rgb[cords] / 2; // Переложили красный
-                                row[i + 1] = rgb[cords + 1] / 2; // Переложили зеленый
-                                row[i + 2] = rgb[cords + 2] / 2; // Переложили синий
+                                row[i] = rgb[cords] / colour; // Переложили красный
+                                row[i + 1] = rgb[cords + 1] / colour; // Переложили зеленый
+                                row[i + 2] = rgb[cords + 2] / colour; // Переложили синий
                             }
                         }
                     }
