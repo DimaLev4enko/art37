@@ -1,6 +1,5 @@
 use image::open;
 use rayon::prelude::*;
-use std::path::Path;
 
 const MASK_DARK: [[u8; 3]; 3] = [[1, 1, 1], [1, 1, 1], [1, 1, 1]];
 
@@ -51,7 +50,7 @@ fn main() {
             .read_line(&mut input)
             .expect("Ошибка ввода");
         if let Ok(num) = input.trim().parse::<u8>() {
-            if num == 1 || num == 2 {
+            if num == 1 || num == 2 || num == 3 {
                 break num;
             } else {
                 println!("Введите 1 или 2");
@@ -150,7 +149,7 @@ fn main() {
                                 }
                             }
                             55 => {
-                                if STAMP_3[maty][matx] == 1 {
+                                if STAMP_7[maty][matx] == 1 {
                                     row[x] = 0;
                                 }
                             }
@@ -160,53 +159,23 @@ fn main() {
                 });
             println!("Готово! Записываю");
             println!("Выберите формат вывода: 1 - BMP, 2 - PNG");
-            let choice = loop {
-                input.clear();
-                std::io::stdin()
-                    .read_line(&mut input)
-                    .expect("Ошибка ввода");
-                if let Ok(num) = input.trim().parse::<u8>() {
-                    if num == 1 || num == 2 {
-                        break num;
-                    } else {
-                        println!("Введите 1 или 2");
-                    }
-                }
-            };
-            match choice {
-                1 => {
-                    println!("Enter file name");
-                    let path = parse();
-                    image::save_buffer(
-                        path,
-                        &pngvec,
-                        width as u32,
-                        height as u32,
-                        image::ColorType::L8,
-                    )
-                    .expect("neydacha");
-                }
-                2 => {
-                    println!("Enter file name");
-                    let path = parse();
-                    image::save_buffer(
-                        path,
-                        &pngvec,
-                        width as u32,
-                        height as u32,
-                        image::ColorType::L8,
-                    )
-                    .expect("neydacha");
-                }
-                _ => unreachable!(),
-            }
+            println!("Enter file name");
+            let path = parse();
+            image::save_buffer(
+                path,
+                &pngvec,
+                width as u32,
+                height as u32,
+                image::ColorType::L8,
+            )
+            .expect("neydacha");
             std::fs::write("output.txt", &buffer).expect("Не удалось записать файл");
             println!("Готово! Смотри результат в output.txt");
         }
         2 => {
             let width = width * 5;
             let height = height * 5;
-            let mut pngvec = vec![128; (width * height) as usize * 3];
+            let mut pngvec = vec![0; (width * height) as usize * 3];
             pngvec
                 .par_chunks_mut(width as usize * 3)
                 .enumerate()
@@ -230,6 +199,56 @@ fn main() {
                                 row[i] = rgb[cords]; // Переложили красный
                                 row[i + 1] = rgb[cords + 1]; // Переложили зеленый
                                 row[i + 2] = rgb[cords + 2]; // Переложили синий
+                            }
+                        }
+                    }
+                });
+            println!("Enter file name");
+            let path = parse();
+            image::save_buffer(
+                path,
+                &pngvec,
+                width as u32,
+                height as u32,
+                image::ColorType::Rgb8,
+            )
+            .expect("neydacha");
+        }
+        3 => {
+            let mut pngvec = vec![0; (width * height) as usize * 3];
+            pngvec
+                .par_chunks_mut(width as usize * 3)
+                .enumerate()
+                .for_each(|(y, row)| {
+                    let rowy = y / 5;
+                    let maty = y % 5;
+                    let rowy1 = rowy * 5;
+                    for x in 0..width {
+                        let pixel = x / 5;
+                        let pixel1 = pixel * 5;
+                        let matx = (x % 5) as usize;
+                        let cords = ((rowy1 as u32 * width) + pixel1) * 3;
+                        let cords = cords as usize;
+                        let i = (x * 3) as usize;
+                        if (rowy + pixel as usize) % 2 == 0 {
+                            if STAMP_3[maty][matx] == 1 {
+                                row[i] = rgb[cords]; // Переложили красный
+                                row[i + 1] = rgb[cords + 1]; // Переложили зеленый
+                                row[i + 2] = rgb[cords + 2]; // Переложили синий
+                            } else if STAMP_3[maty][matx] == 0 {
+                                row[i] = rgb[cords] / 2; // Переложили красный
+                                row[i + 1] = rgb[cords + 1] / 2; // Переложили зеленый
+                                row[i + 2] = rgb[cords + 2] / 2; // Переложили синий
+                            }
+                        } else {
+                            if STAMP_7[maty][matx] == 1 {
+                                row[i] = rgb[cords]; // Переложили красный
+                                row[i + 1] = rgb[cords + 1]; // Переложили зеленый
+                                row[i + 2] = rgb[cords + 2]; // Переложили синий
+                            } else if STAMP_7[maty][matx] == 0 {
+                                row[i] = rgb[cords] / 2; // Переложили красный
+                                row[i + 1] = rgb[cords + 1] / 2; // Переложили зеленый
+                                row[i + 2] = rgb[cords + 2] / 2; // Переложили синий
                             }
                         }
                     }
