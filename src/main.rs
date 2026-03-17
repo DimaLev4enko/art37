@@ -319,10 +319,28 @@ fn main() {
             .expect("neydacha");
         }
         4 => {
+            let dirs = ["output_frames", "input_frames"];
+            for dir in dirs {
+                let _ = fs::remove_dir_all(dir);
+            }
             let _ = fs::create_dir_all("input_frames");
             let _ = fs::create_dir_all("output_frames");
             println!("Video name:");
             let input_video = parse();
+            println!("введите кратность");
+            let choice = loop {
+                input.clear();
+                std::io::stdin()
+                    .read_line(&mut input)
+                    .expect("Ошибка ввода");
+                if let Ok(num) = input.trim().parse::<usize>() {
+                    if num > 0 {
+                        break num;
+                    } else {
+                        println!("Введите больше 0");
+                    }
+                }
+            };
             let extract_status = Command::new("ffmpeg")
                 .arg("-y")
                 .arg("-i")
@@ -351,20 +369,7 @@ fn main() {
                 println!("Папка пуста, кадров нет!");
                 return;
             }
-            println!("введите кратность");
-            let choice = loop {
-                input.clear();
-                std::io::stdin()
-                    .read_line(&mut input)
-                    .expect("Ошибка ввода");
-                if let Ok(num) = input.trim().parse::<usize>() {
-                    if num > 0 {
-                        break num;
-                    } else {
-                        println!("Введите больше 0");
-                    }
-                }
-            };
+
             paths.par_iter().for_each(|path| {
                 let file_name = match path.file_name() {
                     Some(name) => name,
